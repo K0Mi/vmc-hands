@@ -497,21 +497,9 @@ const animation = {
   loop: true,
 };
 
-const btnRec = document.getElementById('btn-rec');
-const btnKey = document.getElementById('btn-key');
-const btnPlay = document.getElementById('btn-play');
-const btnStop = document.getElementById('btn-stop');
-const btnClearAnim = document.getElementById('btn-clear-anim');
-const btnSaveAnim = document.getElementById('btn-save-anim');
-const btnLoadAnim = document.getElementById('btn-load-anim');
-const animFile = document.getElementById('anim-file');
-const animSpeed = document.getElementById('anim-speed');
-const animLoop = document.getElementById('anim-loop');
-const speedVal = document.getElementById('speed-val');
-const timelineBar = document.getElementById('timeline-bar');
-const timelineProgress = document.getElementById('timeline-progress');
-const keyframesEl = document.getElementById('keyframes');
-const timelineInfo = document.getElementById('timeline-info');
+// Animation elements - grabbed in init() to ensure DOM ready
+let btnRec, btnKey, btnPlay, btnStop, btnClearAnim, btnSaveAnim, btnLoadAnim;
+let animFile, animSpeed, animLoop, speedVal, timelineBar, timelineProgress, keyframesEl, timelineInfo;
 
 function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -775,6 +763,23 @@ function animationLoop() {
 // ─── Init ──────────────────────────────────────────────────────────
 
 function init() {
+  // Grab animation elements
+  btnRec = document.getElementById('btn-rec');
+  btnKey = document.getElementById('btn-key');
+  btnPlay = document.getElementById('btn-play');
+  btnStop = document.getElementById('btn-stop');
+  btnClearAnim = document.getElementById('btn-clear-anim');
+  btnSaveAnim = document.getElementById('btn-save-anim');
+  btnLoadAnim = document.getElementById('btn-load-anim');
+  animFile = document.getElementById('anim-file');
+  animSpeed = document.getElementById('anim-speed');
+  animLoop = document.getElementById('anim-loop');
+  speedVal = document.getElementById('speed-val');
+  timelineBar = document.getElementById('timeline-bar');
+  timelineProgress = document.getElementById('timeline-progress');
+  keyframesEl = document.getElementById('keyframes');
+  timelineInfo = document.getElementById('timeline-info');
+  
   // Button events
   btnCamera.addEventListener('click', () => {
     cameraRunning ? stopCamera() : startCamera();
