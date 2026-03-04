@@ -538,15 +538,19 @@ function startRecording() {
   animation.recordStart = Date.now();
   animation.keyframes = [];
   animation.duration = 0;
-  btnRec.classList.add('recording');
-  btnRec.textContent = '⏺ Recording...';
+  if (btnRec) {
+    btnRec.classList.add('recording');
+    btnRec.textContent = '⏺ Recording...';
+  }
   updateTimelineUI();
 }
 
 function stopRecording() {
   animation.recording = false;
-  btnRec.classList.remove('recording');
-  btnRec.textContent = '⏺ Record';
+  if (btnRec) {
+    btnRec.classList.remove('recording');
+    btnRec.textContent = '⏺ Record';
+  }
   
   if (animation.keyframes.length > 0) {
     animation.duration = animation.keyframes[animation.keyframes.length - 1].time;
@@ -562,15 +566,19 @@ function startPlayback() {
   
   animation.playing = true;
   animation.playStart = Date.now();
-  btnPlay.classList.add('playing');
-  btnPlay.textContent = '▶ Playing';
+  if (btnPlay) {
+    btnPlay.classList.add('playing');
+    btnPlay.textContent = '▶ Playing';
+  }
 }
 
 function stopPlayback() {
   animation.playing = false;
-  btnPlay.classList.remove('playing');
-  btnPlay.textContent = '▶ Play';
-  timelineProgress.style.width = '0%';
+  if (btnPlay) {
+    btnPlay.classList.remove('playing');
+    btnPlay.textContent = '▶ Play';
+  }
+  if (timelineProgress) timelineProgress.style.width = '0%';
 }
 
 function lerp(a, b, t) {
@@ -644,7 +652,7 @@ function updateAnimation() {
   
   // Update progress bar
   const progress = animation.duration > 0 ? (elapsed / animation.duration) * 100 : 0;
-  timelineProgress.style.width = `${progress}%`;
+  if (timelineProgress) timelineProgress.style.width = `${progress}%`;
   
   // Get interpolated pose and apply
   const interpolated = getInterpolatedPose(elapsed);
@@ -692,6 +700,8 @@ function updateAllSliders() {
 }
 
 function updateTimelineUI() {
+  if (!keyframesEl || !timelineInfo) return;
+  
   // Update keyframe markers
   keyframesEl.innerHTML = '';
   const duration = animation.duration || 1;
