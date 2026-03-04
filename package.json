@@ -7,10 +7,16 @@
     "build": "vite build",
     "bridge": "node bridge/index.js"
   },
-  "keywords": ["vmc", "vseeface", "hand-tracking", "mediapipe"],
+  "keywords": [
+    "vmc",
+    "vseeface",
+    "hand-tracking",
+    "mediapipe"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@vitejs/plugin-basic-ssl": "^1.2.0",
     "vite": "^5.4.21"
   },
   "dependencies": {

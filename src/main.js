@@ -50,6 +50,27 @@ const pose = {
   }
 };
 
+// Body bone poses (degrees) - { boneName: { x, y, z } }
+const bodyPose = {
+  Head: { x: 0, y: 0, z: 0 },
+  Neck: { x: 0, y: 0, z: 0 },
+  Spine: { x: 0, y: 0, z: 0 },
+  Chest: { x: 0, y: 0, z: 0 },
+  Hips: { x: 0, y: 0, z: 0 },
+  RightShoulder: { x: 0, y: 0, z: 0 },
+  RightUpperArm: { x: 0, y: 0, z: 0 },
+  RightLowerArm: { x: 0, y: 0, z: 0 },
+  LeftShoulder: { x: 0, y: 0, z: 0 },
+  LeftUpperArm: { x: 0, y: 0, z: 0 },
+  LeftLowerArm: { x: 0, y: 0, z: 0 },
+  RightUpperLeg: { x: 0, y: 0, z: 0 },
+  RightLowerLeg: { x: 0, y: 0, z: 0 },
+  RightFoot: { x: 0, y: 0, z: 0 },
+  LeftUpperLeg: { x: 0, y: 0, z: 0 },
+  LeftLowerLeg: { x: 0, y: 0, z: 0 },
+  LeftFoot: { x: 0, y: 0, z: 0 },
+};
+
 // Smoothed values for tracking mode
 const smoothed = {
   right: {},
@@ -136,6 +157,33 @@ function lerp(a, b, t) {
 
 const BONE_NAMES = ['Proximal', 'Intermediate', 'Distal'];
 const FINGERS = ['Thumb', 'Index', 'Middle', 'Ring', 'Little'];
+
+// Convert euler angles (degrees) to quaternion
+function eulerToQuat(x, y, z) {
+  const DEG2RAD = Math.PI / 180;
+  const cx = Math.cos(x * DEG2RAD / 2);
+  const sx = Math.sin(x * DEG2RAD / 2);
+  const cy = Math.cos(y * DEG2RAD / 2);
+  const sy = Math.sin(y * DEG2RAD / 2);
+  const cz = Math.cos(z * DEG2RAD / 2);
+  const sz = Math.sin(z * DEG2RAD / 2);
+  
+  return {
+    x: sx * cy * cz - cx * sy * sz,
+    y: cx * sy * cz + sx * cy * sz,
+    z: cx * cy * sz - sx * sy * cz,
+    w: cx * cy * cz + sx * sy * sz
+  };
+}
+
+function bodyPoseToBones() {
+  const bones = [];
+  for (const [boneName, rot] of Object.entries(bodyPose)) {
+    const quat = eulerToQuat(rot.x, rot.y, rot.z);
+    bones.push({ name: boneName, quat });
+  }
+  return bones;
+}
 
 function poseToBones(handPose, isLeft) {
   const side = isLeft ? 'Left' : 'Right';
@@ -351,17 +399,29 @@ function updateSlidersFromPose(handPose, hand) {
 
 function onSliderChange(e) {
   const slider = e.target;
-  const hand = slider.dataset.hand;
-  const finger = slider.dataset.finger;
-  const joint = slider.dataset.joint;
   const value = parseFloat(slider.value);
   
   slider.nextElementSibling.textContent = `${Math.round(value)}°`;
   
-  if (joint === 'spread') {
-    pose[hand][finger][3] = value;
-  } else {
-    pose[hand][finger][parseInt(joint)] = value;
+  // Body bone slider
+  if (slider.dataset.bone) {
+    const bone = slider.dataset.bone;
+    const axis = slider.dataset.axis;
+    if (bodyPose[bone]) {
+      bodyPose[bone][axis] = value;
+    }
+  }
+  // Hand slider
+  else if (slider.dataset.hand) {
+    const hand = slider.dataset.hand;
+    const finger = slider.dataset.finger;
+    const joint = slider.dataset.joint;
+    
+    if (joint === 'spread') {
+      pose[hand][finger][3] = value;
+    } else {
+      pose[hand][finger][parseInt(joint)] = value;
+    }
   }
   
   // In pose mode, send immediately
@@ -372,6 +432,7 @@ function onSliderChange(e) {
 
 function sendPose() {
   const bones = [
+    ...bodyPoseToBones(),
     ...poseToBones(pose.right, false),
     ...poseToBones(pose.left, true)
   ];
@@ -379,6 +440,7 @@ function sendPose() {
 }
 
 function resetPose() {
+  // Reset hands
   for (const hand of ['right', 'left']) {
     for (const finger of FINGERS) {
       const len = finger === 'Thumb' ? 4 : 3;
@@ -386,6 +448,12 @@ function resetPose() {
     }
   }
   
+  // Reset body
+  for (const bone of Object.keys(bodyPose)) {
+    bodyPose[bone] = { x: 0, y: 0, z: 0 };
+  }
+  
+  // Reset all sliders
   document.querySelectorAll('input[type="range"]').forEach(slider => {
     slider.value = 0;
     slider.nextElementSibling.textContent = '0°';

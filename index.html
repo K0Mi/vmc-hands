@@ -59,7 +59,7 @@
     }
     
     #webcam { transform: scaleX(-1); }
-    #canvas { pointer-events: none; }
+    #canvas { transform: scaleX(-1); pointer-events: none; }
     
     .status {
       display: flex;
@@ -321,6 +321,142 @@
           <div class="slider-row"><label>Prox</label><input type="range" data-hand="left" data-finger="Little" data-joint="0" min="-20" max="90" value="0"><span class="value">0°</span></div>
           <div class="slider-row"><label>Int</label><input type="range" data-hand="left" data-finger="Little" data-joint="1" min="0" max="120" value="0"><span class="value">0°</span></div>
           <div class="slider-row"><label>Dist</label><input type="range" data-hand="left" data-finger="Little" data-joint="2" min="0" max="90" value="0"><span class="value">0°</span></div>
+        </div>
+      </div>
+      
+      <!-- Body Controls -->
+      <div class="hand-controls" id="body-controls">
+        <h2>Body</h2>
+        
+        <div class="finger-group">
+          <h3>Head</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="Head" data-axis="x" min="-45" max="45" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="Head" data-axis="y" min="-60" max="60" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Z</label><input type="range" data-bone="Head" data-axis="z" min="-30" max="30" value="0"><span class="value">0°</span></div>
+        </div>
+        
+        <div class="finger-group">
+          <h3>Neck</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="Neck" data-axis="x" min="-30" max="30" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="Neck" data-axis="y" min="-45" max="45" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Z</label><input type="range" data-bone="Neck" data-axis="z" min="-20" max="20" value="0"><span class="value">0°</span></div>
+        </div>
+        
+        <div class="finger-group">
+          <h3>Spine</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="Spine" data-axis="x" min="-30" max="30" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="Spine" data-axis="y" min="-30" max="30" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Z</label><input type="range" data-bone="Spine" data-axis="z" min="-20" max="20" value="0"><span class="value">0°</span></div>
+        </div>
+        
+        <div class="finger-group">
+          <h3>Chest</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="Chest" data-axis="x" min="-20" max="20" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="Chest" data-axis="y" min="-30" max="30" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Z</label><input type="range" data-bone="Chest" data-axis="z" min="-15" max="15" value="0"><span class="value">0°</span></div>
+        </div>
+        
+        <div class="finger-group">
+          <h3>Hips</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="Hips" data-axis="x" min="-30" max="30" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="Hips" data-axis="y" min="-45" max="45" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Z</label><input type="range" data-bone="Hips" data-axis="z" min="-20" max="20" value="0"><span class="value">0°</span></div>
+        </div>
+      </div>
+      
+      <!-- Right Arm -->
+      <div class="hand-controls" id="right-arm-controls">
+        <h2>Right Arm</h2>
+        
+        <div class="finger-group">
+          <h3>Shoulder</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="RightShoulder" data-axis="x" min="-30" max="30" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="RightShoulder" data-axis="y" min="-20" max="20" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Z</label><input type="range" data-bone="RightShoulder" data-axis="z" min="-30" max="30" value="0"><span class="value">0°</span></div>
+        </div>
+        
+        <div class="finger-group">
+          <h3>Upper Arm</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="RightUpperArm" data-axis="x" min="-90" max="90" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="RightUpperArm" data-axis="y" min="-90" max="90" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Z</label><input type="range" data-bone="RightUpperArm" data-axis="z" min="-90" max="90" value="0"><span class="value">0°</span></div>
+        </div>
+        
+        <div class="finger-group">
+          <h3>Lower Arm</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="RightLowerArm" data-axis="x" min="-150" max="0" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="RightLowerArm" data-axis="y" min="-90" max="90" value="0"><span class="value">0°</span></div>
+        </div>
+      </div>
+      
+      <!-- Left Arm -->
+      <div class="hand-controls" id="left-arm-controls">
+        <h2>Left Arm</h2>
+        
+        <div class="finger-group">
+          <h3>Shoulder</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="LeftShoulder" data-axis="x" min="-30" max="30" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="LeftShoulder" data-axis="y" min="-20" max="20" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Z</label><input type="range" data-bone="LeftShoulder" data-axis="z" min="-30" max="30" value="0"><span class="value">0°</span></div>
+        </div>
+        
+        <div class="finger-group">
+          <h3>Upper Arm</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="LeftUpperArm" data-axis="x" min="-90" max="90" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="LeftUpperArm" data-axis="y" min="-90" max="90" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Z</label><input type="range" data-bone="LeftUpperArm" data-axis="z" min="-90" max="90" value="0"><span class="value">0°</span></div>
+        </div>
+        
+        <div class="finger-group">
+          <h3>Lower Arm</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="LeftLowerArm" data-axis="x" min="0" max="150" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="LeftLowerArm" data-axis="y" min="-90" max="90" value="0"><span class="value">0°</span></div>
+        </div>
+      </div>
+      
+      <!-- Right Leg -->
+      <div class="hand-controls" id="right-leg-controls">
+        <h2>Right Leg</h2>
+        
+        <div class="finger-group">
+          <h3>Upper Leg</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="RightUpperLeg" data-axis="x" min="-90" max="45" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="RightUpperLeg" data-axis="y" min="-45" max="45" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Z</label><input type="range" data-bone="RightUpperLeg" data-axis="z" min="-45" max="30" value="0"><span class="value">0°</span></div>
+        </div>
+        
+        <div class="finger-group">
+          <h3>Lower Leg</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="RightLowerLeg" data-axis="x" min="0" max="150" value="0"><span class="value">0°</span></div>
+        </div>
+        
+        <div class="finger-group">
+          <h3>Foot</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="RightFoot" data-axis="x" min="-45" max="60" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="RightFoot" data-axis="y" min="-30" max="30" value="0"><span class="value">0°</span></div>
+        </div>
+      </div>
+      
+      <!-- Left Leg -->
+      <div class="hand-controls" id="left-leg-controls">
+        <h2>Left Leg</h2>
+        
+        <div class="finger-group">
+          <h3>Upper Leg</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="LeftUpperLeg" data-axis="x" min="-90" max="45" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="LeftUpperLeg" data-axis="y" min="-45" max="45" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Z</label><input type="range" data-bone="LeftUpperLeg" data-axis="z" min="-30" max="45" value="0"><span class="value">0°</span></div>
+        </div>
+        
+        <div class="finger-group">
+          <h3>Lower Leg</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="LeftLowerLeg" data-axis="x" min="0" max="150" value="0"><span class="value">0°</span></div>
+        </div>
+        
+        <div class="finger-group">
+          <h3>Foot</h3>
+          <div class="slider-row"><label>X</label><input type="range" data-bone="LeftFoot" data-axis="x" min="-45" max="60" value="0"><span class="value">0°</span></div>
+          <div class="slider-row"><label>Y</label><input type="range" data-bone="LeftFoot" data-axis="y" min="-30" max="30" value="0"><span class="value">0°</span></div>
         </div>
       </div>
       
