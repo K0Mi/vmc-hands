@@ -581,10 +581,6 @@ function stopPlayback() {
   if (timelineProgress) timelineProgress.style.width = '0%';
 }
 
-function lerp(a, b, t) {
-  return a + (b - a) * t;
-}
-
 function lerpPose(poseA, poseB, t) {
   const result = {};
   for (const hand of ['right', 'left']) {
