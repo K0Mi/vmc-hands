@@ -1,0 +1,21 @@
+{
+  "name": "vmc-hands",
+  "version": "1.0.0",
+  "description": "Hand tracking to VSeeFace via VMC protocol",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "bridge": "node bridge/index.js"
+  },
+  "keywords": ["vmc", "vseeface", "hand-tracking", "mediapipe"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.4.21"
+  },
+  "dependencies": {
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/drawing_utils": "^0.3.1675466124",
+    "@mediapipe/hands": "^0.4.1675469240"
+  }
+}
