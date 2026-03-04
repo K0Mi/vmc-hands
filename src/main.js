@@ -484,6 +484,294 @@ function poseLoop() {
   requestAnimationFrame(poseLoop);
 }
 
+// ─── Animation System ──────────────────────────────────────────────
+
+const animation = {
+  keyframes: [],      // Array of { time, pose, bodyPose }
+  duration: 0,
+  playing: false,
+  recording: false,
+  recordStart: 0,
+  playStart: 0,
+  speed: 1.0,
+  loop: true,
+};
+
+const btnRec = document.getElementById('btn-rec');
+const btnKey = document.getElementById('btn-key');
+const btnPlay = document.getElementById('btn-play');
+const btnStop = document.getElementById('btn-stop');
+const btnClearAnim = document.getElementById('btn-clear-anim');
+const btnSaveAnim = document.getElementById('btn-save-anim');
+const btnLoadAnim = document.getElementById('btn-load-anim');
+const animFile = document.getElementById('anim-file');
+const animSpeed = document.getElementById('anim-speed');
+const animLoop = document.getElementById('anim-loop');
+const speedVal = document.getElementById('speed-val');
+const timelineBar = document.getElementById('timeline-bar');
+const timelineProgress = document.getElementById('timeline-progress');
+const keyframesEl = document.getElementById('keyframes');
+const timelineInfo = document.getElementById('timeline-info');
+
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function getCurrentPoseSnapshot() {
+  return {
+    pose: deepClone(pose),
+    bodyPose: deepClone(bodyPose)
+  };
+}
+
+function addKeyframe() {
+  const time = animation.recording 
+    ? (Date.now() - animation.recordStart) / 1000
+    : animation.duration;
+  
+  animation.keyframes.push({
+    time,
+    ...getCurrentPoseSnapshot()
+  });
+  
+  // Sort by time
+  animation.keyframes.sort((a, b) => a.time - b.time);
+  
+  // Update duration
+  if (animation.keyframes.length > 0) {
+    animation.duration = animation.keyframes[animation.keyframes.length - 1].time;
+  }
+  
+  updateTimelineUI();
+}
+
+function startRecording() {
+  animation.recording = true;
+  animation.recordStart = Date.now();
+  animation.keyframes = [];
+  animation.duration = 0;
+  btnRec.classList.add('recording');
+  btnRec.textContent = '⏺ Recording...';
+  updateTimelineUI();
+}
+
+function stopRecording() {
+  animation.recording = false;
+  btnRec.classList.remove('recording');
+  btnRec.textContent = '⏺ Record';
+  
+  if (animation.keyframes.length > 0) {
+    animation.duration = animation.keyframes[animation.keyframes.length - 1].time;
+  }
+  updateTimelineUI();
+}
+
+function startPlayback() {
+  if (animation.keyframes.length < 2) {
+    alert('Need at least 2 keyframes to play');
+    return;
+  }
+  
+  animation.playing = true;
+  animation.playStart = Date.now();
+  btnPlay.classList.add('playing');
+  btnPlay.textContent = '▶ Playing';
+}
+
+function stopPlayback() {
+  animation.playing = false;
+  btnPlay.classList.remove('playing');
+  btnPlay.textContent = '▶ Play';
+  timelineProgress.style.width = '0%';
+}
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+function lerpPose(poseA, poseB, t) {
+  const result = {};
+  for (const hand of ['right', 'left']) {
+    result[hand] = {};
+    for (const finger of FINGERS) {
+      result[hand][finger] = poseA[hand][finger].map((v, i) => 
+        lerp(v, poseB[hand][finger][i], t)
+      );
+    }
+  }
+  return result;
+}
+
+function lerpBodyPose(bodyA, bodyB, t) {
+  const result = {};
+  for (const bone of Object.keys(bodyA)) {
+    result[bone] = {
+      x: lerp(bodyA[bone].x, bodyB[bone].x, t),
+      y: lerp(bodyA[bone].y, bodyB[bone].y, t),
+      z: lerp(bodyA[bone].z, bodyB[bone].z, t),
+    };
+  }
+  return result;
+}
+
+function getInterpolatedPose(time) {
+  const kfs = animation.keyframes;
+  
+  if (kfs.length === 0) return null;
+  if (kfs.length === 1) return { pose: kfs[0].pose, bodyPose: kfs[0].bodyPose };
+  
+  // Find surrounding keyframes
+  let prev = kfs[0];
+  let next = kfs[kfs.length - 1];
+  
+  for (let i = 0; i < kfs.length - 1; i++) {
+    if (time >= kfs[i].time && time <= kfs[i + 1].time) {
+      prev = kfs[i];
+      next = kfs[i + 1];
+      break;
+    }
+  }
+  
+  // Interpolate
+  const duration = next.time - prev.time;
+  const t = duration > 0 ? (time - prev.time) / duration : 0;
+  
+  return {
+    pose: lerpPose(prev.pose, next.pose, t),
+    bodyPose: lerpBodyPose(prev.bodyPose, next.bodyPose, t)
+  };
+}
+
+function updateAnimation() {
+  if (!animation.playing) return;
+  
+  let elapsed = ((Date.now() - animation.playStart) / 1000) * animation.speed;
+  
+  if (animation.loop && animation.duration > 0) {
+    elapsed = elapsed % animation.duration;
+  } else if (elapsed >= animation.duration) {
+    stopPlayback();
+    return;
+  }
+  
+  // Update progress bar
+  const progress = animation.duration > 0 ? (elapsed / animation.duration) * 100 : 0;
+  timelineProgress.style.width = `${progress}%`;
+  
+  // Get interpolated pose and apply
+  const interpolated = getInterpolatedPose(elapsed);
+  if (interpolated) {
+    // Apply to local state
+    Object.assign(pose.right, interpolated.pose.right);
+    Object.assign(pose.left, interpolated.pose.left);
+    for (const bone of Object.keys(bodyPose)) {
+      Object.assign(bodyPose[bone], interpolated.bodyPose[bone]);
+    }
+    
+    // Send to VMC
+    sendPose();
+    
+    // Update sliders to reflect current pose
+    updateAllSliders();
+  }
+}
+
+function updateAllSliders() {
+  // Update hand sliders
+  for (const hand of ['right', 'left']) {
+    for (const [finger, values] of Object.entries(pose[hand])) {
+      for (let i = 0; i < values.length; i++) {
+        const joint = i < 3 ? i : 'spread';
+        const slider = document.querySelector(`input[data-hand="${hand}"][data-finger="${finger}"][data-joint="${joint}"]`);
+        if (slider) {
+          slider.value = Math.round(values[i]);
+          slider.nextElementSibling.textContent = `${Math.round(values[i])}°`;
+        }
+      }
+    }
+  }
+  
+  // Update body sliders
+  for (const [bone, rot] of Object.entries(bodyPose)) {
+    for (const axis of ['x', 'y', 'z']) {
+      const slider = document.querySelector(`input[data-bone="${bone}"][data-axis="${axis}"]`);
+      if (slider) {
+        slider.value = Math.round(rot[axis]);
+        slider.nextElementSibling.textContent = `${Math.round(rot[axis])}°`;
+      }
+    }
+  }
+}
+
+function updateTimelineUI() {
+  // Update keyframe markers
+  keyframesEl.innerHTML = '';
+  const duration = animation.duration || 1;
+  
+  for (const kf of animation.keyframes) {
+    const marker = document.createElement('div');
+    marker.className = 'keyframe-marker';
+    marker.style.left = `${(kf.time / duration) * 100}%`;
+    keyframesEl.appendChild(marker);
+  }
+  
+  // Update info
+  timelineInfo.textContent = `${animation.keyframes.length} keyframes, ${animation.duration.toFixed(1)}s`;
+}
+
+function clearAnimation() {
+  if (animation.keyframes.length > 0 && !confirm('Clear all keyframes?')) return;
+  animation.keyframes = [];
+  animation.duration = 0;
+  stopPlayback();
+  stopRecording();
+  updateTimelineUI();
+}
+
+function saveAnimation() {
+  if (animation.keyframes.length === 0) {
+    alert('No keyframes to save');
+    return;
+  }
+  
+  const data = {
+    version: 1,
+    duration: animation.duration,
+    keyframes: animation.keyframes
+  };
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `animation-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function loadAnimation(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.keyframes && Array.isArray(data.keyframes)) {
+        animation.keyframes = data.keyframes;
+        animation.duration = data.duration || 0;
+        updateTimelineUI();
+      }
+    } catch (err) {
+      alert('Invalid animation file');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// Animation loop
+function animationLoop() {
+  updateAnimation();
+  requestAnimationFrame(animationLoop);
+}
+
 // ─── Init ──────────────────────────────────────────────────────────
 
 function init() {
@@ -517,8 +805,64 @@ function init() {
     settings.smoothing = parseFloat(e.target.value);
   });
   
-  // Start pose loop
+  // Animation controls
+  btnRec.addEventListener('click', () => {
+    animation.recording ? stopRecording() : startRecording();
+  });
+  
+  btnKey.addEventListener('click', addKeyframe);
+  
+  btnPlay.addEventListener('click', () => {
+    animation.playing ? stopPlayback() : startPlayback();
+  });
+  
+  btnStop.addEventListener('click', () => {
+    stopPlayback();
+    stopRecording();
+  });
+  
+  btnClearAnim.addEventListener('click', clearAnimation);
+  btnSaveAnim.addEventListener('click', saveAnimation);
+  btnLoadAnim.addEventListener('click', () => animFile.click());
+  animFile.addEventListener('change', (e) => {
+    if (e.target.files[0]) loadAnimation(e.target.files[0]);
+  });
+  
+  animSpeed.addEventListener('input', (e) => {
+    animation.speed = parseFloat(e.target.value);
+    speedVal.textContent = `${animation.speed.toFixed(1)}x`;
+  });
+  
+  animLoop.addEventListener('change', (e) => {
+    animation.loop = e.target.checked;
+  });
+  
+  timelineBar.addEventListener('click', (e) => {
+    if (animation.keyframes.length < 2) return;
+    const rect = timelineBar.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const time = x * animation.duration;
+    
+    // Jump to this time
+    animation.playStart = Date.now() - (time * 1000 / animation.speed);
+    if (!animation.playing) {
+      const interpolated = getInterpolatedPose(time);
+      if (interpolated) {
+        Object.assign(pose.right, interpolated.pose.right);
+        Object.assign(pose.left, interpolated.pose.left);
+        for (const bone of Object.keys(bodyPose)) {
+          Object.assign(bodyPose[bone], interpolated.bodyPose[bone]);
+        }
+        sendPose();
+        updateAllSliders();
+        timelineProgress.style.width = `${x * 100}%`;
+      }
+    }
+  });
+  
+  // Start loops
   poseLoop();
+  animationLoop();
   
   // Auto-connect bridge
   connectBridge();
